@@ -1,0 +1,60 @@
+mc:
+  key_ending: ['now', 'arc']
+  key_separator: "."
+  value_separator: ";"
+  append_value_separator: ";;;"
+name: ['iongw1',]
+modbus:
+  #id [id, name, desc,]
+  id_data: [
+  [2, 'm1'],
+  [3, 'm2'],
+  [4, 'm3'],
+  [5, 'm4'],
+  [6, 'm5'],
+  [7, 'm6'],
+  [8, 'm7'],
+  ]
+  rr:
+    - start_and_len: [3000, 112]
+      type: 'flt32'
+      #data[pos, name, save_bool, save_change_val, save_change_time]
+      data: [
+      [0, 'Ia', false, ],
+      [1, 'Ib', false, ],
+      [2, 'Ic', false, ],
+      [5, 'Iavg', false, ],
+      [10, 'Uab', false, ],
+      [11, 'Ubc', false, ],
+      [12, 'Uca', false, ],
+      [13, 'Ulavg', false, ],
+      [14, 'Ua', false, ],
+      [15, 'Ub', false, ],
+      [16, 'Uc', false, ],
+      [18, 'Uavg', false, ],
+      [27, 'Pa', false, ],
+      [28, 'Pb', false, ],
+      [29, 'Pc', false, ],
+      [30, 'Psum', false, ],
+      [34, 'PreactSum', false, ],
+      [38, 'PtotalSum', false, ],
+      [42, 'CosPhi', false, ],
+      [55, 'Freq', false, ],
+      ]
+    - start_and_len: [3204, 72]
+      type: 'int64'
+      date: [
+      [0, 'EactSumImport', false, ],
+      [1, 'EactSumExport', false, ],
+      [4, 'EreactSumImport', false, ],
+      [5, 'EreactSumExport', false, ],
+      [13, 'EpartActImport', false, ],
+      [17, 'EpartReactImport', false, ],
+      ]
+    - start_and_len: [3518, 12]
+      type: 'int64'
+      data: [
+      [0, 'EactImportPhA', false, ],
+      [1, 'EactImportPhB', false, ],
+      [2, 'EactImportPhC', false, ],
+      ]
