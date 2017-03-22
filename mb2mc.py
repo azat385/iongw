@@ -28,7 +28,7 @@ for dev in devs:
             str_tstamp = str(datetime.now())
             d = rr.registers
             if reg_type == 'flt32':
-                values = [round(f * 1000, 2) for f in
+                values = [round(f * 1.0, 2) for f in
                           unpack('>{}f'.format(len(d)/2),
                                  pack('>{}H'.format(len(d)), *d)
                                  )
@@ -56,6 +56,7 @@ for dev in devs:
                     mc.set(key=key_name_now,
                            val=key_value,
                            time=0)
+                    print("{}:\t{}".format(key_name_now,key_value))
         finally:
             pass
 
