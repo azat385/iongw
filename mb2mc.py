@@ -6,6 +6,9 @@ from struct import pack, unpack
 import memcache
 from datetime import datetime
 
+devs = yaml_data.whole_data
+print (devs)
+
 mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 # mc.flush_all()
 
@@ -13,12 +16,12 @@ client = ModbusClient(method="rtu", port="/dev/ttyUSB0", baudrate=19200,
                       parity='E', stopbits=1, timeout=2)
 client.connect()
 
-server = yaml_data.get_server_name()
 
-for slave_id, slave_name in yaml_data.get_slave_info():
-    for rr in yaml_data.get_all_requests():
+for dev in devs:
+    slave_id = yaml_data.get_slave_id(dev)
+    for rr in yaml_data.get_all_requests(dev):
         reg_start, reg_len = yaml_data.rr_start_and_len(rr)
-        reg_type = yaml_data.rr_data(rr)
+        reg_type = yaml_data.rr_type(rr)
         reg_data = yaml_data.rr_data(rr)
         try:
             rr = client.read_holding_registers(reg_start - 1, reg_len, unit=slave_id)
@@ -40,12 +43,11 @@ for slave_id, slave_name in yaml_data.get_slave_info():
             print 'id={} error while reading'.format(slave_id)
         else:
             for data in reg_data:
-                pos, name, need_save = data[0:3]
+                pos, name_list, need_save = data[0:3]
+                key_name_now, key_name_lst, key_name_arc= name_list
                 if len(data)>3:
                     save_chg_value = data[3]
                     save_chq_time = data[4]
-                key_name_now, key_name_arc = yaml_data.\
-                    form_key_name(server, slave_name, name,)
                 value = values[pos]
                 key_value = yaml_data.form_key_value(value, str_tstamp)
                 if need_save:
@@ -58,8 +60,6 @@ for slave_id, slave_name in yaml_data.get_slave_info():
             pass
 
 client.close()
-
-
 
 
 '''

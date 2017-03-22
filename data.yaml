@@ -1,26 +1,38 @@
+settings:
+  id:
+    num:  0
+    name: 1
+    desc: 2
+  rr:
+    start: 0
+    len:  1
+    data:
+      pos:  0
+      name: 1
+      save: 2
 mc:
-  key_ending: ['now', 'arc']
+  key_ending: ['now', 'lst', 'arc',]
   key_separator: "."
   value_separator: ";"
   append_value_separator: ";;;"
-name: ['iongw1',]
+name: 'iongw1'
 modbus:
   #id [id, name, desc,]
   id_data: [
-  [2, 'm1'],
-  [3, 'm2'],
-  [4, 'm3'],
-  [5, 'm4'],
-  [6, 'm5'],
-  [7, 'm6'],
-  [8, 'm7'],
+  [2, 'm1', 'desc1',],
+  [3, 'm2', 'desc2',],
+  [4, 'm3', 'desc3',],
+  [5, 'm4', 'desc4',],
+  [6, 'm5', 'desc5',],
+  [7, 'm6', 'desc6',],
+  [8, 'm7', 'desc7',],
   ]
   rr:
     - start_and_len: [3000, 112]
       type: 'flt32'
       #data[pos, name, save_bool, save_change_val, save_change_time]
       data: [
-      [0, 'Ia', false, ],
+      [0, 'Ia', False, ],
       [1, 'Ib', false, ],
       [2, 'Ic', false, ],
       [5, 'Iavg', false, ],
@@ -43,7 +55,7 @@ modbus:
       ]
     - start_and_len: [3204, 72]
       type: 'int64'
-      date: [
+      data: [
       [0, 'EactSumImport', false, ],
       [1, 'EactSumExport', false, ],
       [4, 'EreactSumImport', false, ],

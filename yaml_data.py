@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import yaml
+from cPickle import dumps, loads
+import pprint
+
+
+pp = pprint.PrettyPrinter(width=200)
 
 with open("data.yaml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
@@ -11,32 +15,72 @@ key_separator = cfg['mc']['key_separator']
 value_separator = cfg['mc']['value_separator']
 append_value_separator = cfg['mc']['append_value_separator']
 ending = cfg['mc']['key_ending']
+server_name = cfg['name']
+id_data_list = cfg['modbus']['id_data']
+rr_list = cfg['modbus']['rr']
+
+# pp.pprint(cfg)
 
 
-server = cfg['name']
-id_data = cfg['modbus']['id_data']
-id_data = [tuple(i) for i in id_data]
-id_data = np.array(id_data,
-                   dtype=[('id', 'i4'), ('name', 'S20')]
-                   )
-print id_data
+def form_key_name(*args):
+    name = "".join(
+        ["{}{}".format(a, key_separator)
+         for a in args
+         ]
+    )
+    lst = ["{}{}".format(name, e) for e in ending]
+    return lst
+
+
+def form_one_device(id_data, rr_ll, s_name=server_name):
+    rr_l = loads(dumps(rr_ll, -1))
+    std_dic = {"id_data": list(id_data),
+               "rr": rr_l}
+    # for r,rr in enumerate(rr_l):
+    #     std_dic["rr"][r]["start_and_len"]=list(rr["start_and_len"])
+    #     std_dic["rr"][r]["data"] = list(rr["data"])
+
+    # device_name = std_dic["id_data"][1]
+    # for r,_ in enumerate(std_dic["rr"]):
+    #     for d, __ in enumerate(std_dic["rr"][r]["data"]):
+    #         tag_name = std_dic["rr"][r]["data"][d][1]
+    #         std_dic["rr"][r]["data"][d][1] = form_key_name(s_name,
+    #                                                     device_name,
+    #                                                     tag_name)
+    device_name = std_dic["id_data"][1]
+    for rr in std_dic["rr"]:
+        for dd in rr["data"]:
+            tag_name = dd[1]
+            dd[1] = form_key_name(s_name,
+                                  device_name,
+                                  tag_name)
+    return std_dic
+
+
+whole_data = [form_one_device(id_data=id_data,
+                              rr_ll=rr_list,
+                              s_name=server_name)
+              for id_data in id_data_list]
+
+
+# id_data = cfg['modbus']['id_data']
+# id_data = [tuple(i) for i in id_data]
+# id_data = np.array(id_data,
+#                    dtype=[('id', 'i4'), ('name', 'S20')]
+#                    )
+# print id_data
 #tag = [r['name'] for r in cfg['modbus']['rr']]
 #tag = [l for tl in tag for l in tl]
 
-def get_server_name():
-    return cfg['name']
 
-def get_slave_id():
-    return id_data['id'].tolist()
+def get_slave_info(dev):
+    return dev['id_data']
 
-def get_slave_name():
-    return id_data['name'].tolist()
+def get_slave_id(dev):
+    return get_slave_info(dev)[0]
 
-def get_slave_info():
-    return cfg['modbus']['id_data']
-
-def get_all_requests():
-    return cfg['modbus']['rr']
+def get_all_requests(dev):
+    return dev['rr']
 
 def rr_start_and_len(r):
     return r['start_and_len']
@@ -47,20 +91,18 @@ def rr_type(r):
 def rr_data(r):
     return r['data']
 
-def form_key_name(*args):
-    name = "".join(
-        ["{}{}".format(a, key_separator)
-         for a in args
-         ]
-    )
-    return ["{}{}".format(name, e) for e in ending]
-
 def form_key_value(*args):
     return "{}{}{}".format(args[0], value_separator, args[1])
 
 if __name__ == '__main__':
     print "start checks"
+    pp.pprint(whole_data)
     #print get_slave_id()
     #print get_slave_name()
-    print form_key_name('sss', 'dddd', 'name')
-    print form_key_value(555, 'strtime')
+    # with open("test_alias.yaml", 'r') as ymlfile:
+    #     cfg_test = yaml.load(ymlfile)
+    #
+    # import pprint
+    #
+    # pp = pprint.PrettyPrinter(width=120)
+    # pp.pprint(cfg_test)
