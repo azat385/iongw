@@ -62,10 +62,10 @@ def check_table_exist():
 
 
 if __name__ == '__main__':
+    db_name = 'test1.db'
     #create_table()
     #write_data_to_db()
     #exit()
-    db_name = 'test1.db'
     #conn = sqlite3.connect(db_name)
     from time import sleep
     import yaml_data
@@ -74,6 +74,8 @@ if __name__ == '__main__':
         for key in all_arc_keys_name:
             for _ in xrange(5):
                 val = mc.get(key)
+                if val is None:
+                    continue
                 if mc.cas(key, ''):
                     arr = get_data_array(val)
                     if arr is not None:
