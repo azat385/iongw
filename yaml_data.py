@@ -15,7 +15,7 @@ key_separator = cfg['mc']['key_separator']
 value_separator = cfg['mc']['value_separator']
 append_value_separator = cfg['mc']['append_value_separator']
 ending = cfg['mc']['key_ending']
-server_name = cfg['name']
+server_name, server_desc = cfg['name']
 id_data_list = cfg['modbus']['id_data']
 rr_list = cfg['modbus']['rr']
 
@@ -71,7 +71,15 @@ whole_data = [form_one_device(id_data=id_data,
 # print id_data
 #tag = [r['name'] for r in cfg['modbus']['rr']]
 #tag = [l for tl in tag for l in tl]
+def get_all_key_names():
+    keys = []
+    for dev in whole_data:
+        for rr in dev['rr']:
+            keys += [d[1] for d in rr['data']]
+    return keys
 
+def get_all_key_names_special(pos=0):
+    return [d[pos] for d in get_all_key_names()]
 
 def get_slave_info(dev):
     return dev['id_data']
@@ -92,11 +100,14 @@ def rr_data(r):
     return r['data']
 
 def form_key_value(*args):
+    # type: (object) -> object
     return "{}{}{}".format(args[0], value_separator, args[1])
 
 if __name__ == '__main__':
     print "start checks"
-    pp.pprint(whole_data)
+    #pp.pprint(whole_data)
+    pp.pprint(get_all_key_names_special(2))
+    #print len(get_all_key_names_special(2))
     #print get_slave_id()
     #print get_slave_name()
     # with open("test_alias.yaml", 'r') as ymlfile:

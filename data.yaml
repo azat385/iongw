@@ -15,7 +15,7 @@ mc:
   key_separator: "."
   value_separator: ";"
   append_value_separator: ";;;"
-name: 'iongw1'
+name: ['iongw1', 'г. Казань, Тэцевская, 223']
 modbus:
   #id [id, name, desc,]
   id_data: [
@@ -30,43 +30,47 @@ modbus:
   rr:
     - start_and_len: [3000, 112]
       type: 'flt32'
-      #data[pos, name, save_bool, save_change_val, save_change_time]
+      #data[  pos, name,
+      #       save_bool,
+      #       [save_change_val, save_change_time in secs],
+      #       [full_desc, units, koef]
+      #   ]
       data: [
-      [0, 'Ia', False, ],
-      [1, 'Ib', false, ],
-      [2, 'Ic', false, ],
-      [5, 'Iavg', false, ],
-      [10, 'Uab', false, ],
-      [11, 'Ubc', false, ],
-      [12, 'Uca', false, ],
-      [13, 'Ulavg', false, ],
-      [14, 'Ua', false, ],
-      [15, 'Ub', false, ],
-      [16, 'Uc', false, ],
-      [18, 'Uavg', false, ],
-      [27, 'Pa', false, ],
-      [28, 'Pb', false, ],
-      [29, 'Pc', false, ],
-      [30, 'Psum', false, ],
-      [34, 'PreactSum', false, ],
-      [38, 'PtotalSum', false, ],
-      [42, 'CosPhi', false, ],
-      [55, 'Freq', false, ],
+      [0, 'Ia',           True, [1, 120],   ['мгновенное значение тока фаза А',  'A']],
+      [1, 'Ib',           True, [1, 120],   ['мгновенное значение тока фаза B',  'A']],
+      [2, 'Ic',           True, [1, 120],   ['мгновенное значение тока фаза C',  'A']],
+      [5, 'Iavg',         True, [1, 120],   ['мгновенное значение тока среднее', 'A']],
+      [10, 'Uab',         True, [5, 120],   ['мгновенное значение напряжения АВ',        'В']],
+      [11, 'Ubc',         True, [5, 120],   ['мгновенное значение напряжения ВС',        'В']],
+      [12, 'Uca',         True, [5, 120],   ['мгновенное значение напряжения СА',        'В']],
+      [13, 'Ulavg',       True, [5, 120],   ['мгновенное значение напряжения среднее LL','В']],
+      [14, 'Ua',          True, [5, 120],   ['мгновенное значение напряжения фаза А',    'В']],
+      [15, 'Ub',          True, [5, 120],   ['мгновенное значение напряжения фаза В',    'В']],
+      [16, 'Uc',          True, [5, 120],   ['мгновенное значение напряжения фаза С',    'В']],
+      [18, 'Uavg',        True, [5, 120],   ['мгновенное значение напряжения среднее L', 'В']],
+      [27, 'Pa',          True, [200, 120], ['мгновенное значение мощность фаза А',  'КВт', 0.001]],
+      [28, 'Pb',          True, [200, 120], ['мгновенное значение мощность фаза В',  'КВт', 0.001]],
+      [29, 'Pc',          True, [200, 120], ['мгновенное значение мощность фаза С',  'КВт', 0.001]],
+      [30, 'Psum',        True, [500, 120], ['мгновенное значение суммарная активная мощность',   'КВт', 0.001]],
+      [34, 'PreactSum',   True, [500, 120], ['мгновенное значение суммарная реактивная мощность', 'КВар', 0.001]],
+      [38, 'PtotalSum',   True, [500, 120], ['мгновенное значение суммарная полная мощность',     'КВ*А', 0.001]],
+      [42, 'CosPhi',      True, [0.1, 120], ['мгновенное значение коэффициент мощности', '']],
+      [55, 'Freq',        True, [200, 120], ['мгновенное значение частоты сети', 'Гц', 0.001]],
       ]
     - start_and_len: [3204, 72]
       type: 'int64'
       data: [
-      [0, 'EactSumImport', false, ],
-      [1, 'EactSumExport', false, ],
-      [4, 'EreactSumImport', false, ],
-      [5, 'EreactSumExport', false, ],
-      [13, 'EpartActImport', false, ],
-      [17, 'EpartReactImport', false, ],
+      [0, 'EactSumImport',    True, [500, 60], ['накопленная суммарная активная энергия', 'КВт*ч', 0.001]],
+      [1, 'EactSumExport', False, ],
+      [4, 'EreactSumImport',  True, [500, 60], ['накопленная суммарная реактивная энергия', 'КВар*ч', 0.001]],
+      [5, 'EreactSumExport', False, ],
+      [13, 'EpartActImport', False, ],
+      [17, 'EpartReactImport', False, ],
       ]
     - start_and_len: [3518, 12]
       type: 'int64'
       data: [
-      [0, 'EactImportPhA', false, ],
-      [1, 'EactImportPhB', false, ],
-      [2, 'EactImportPhC', false, ],
+      [0, 'EactImportPhA', True, [200, 60], ['накопленная активная энергия фаза А', 'КВт*ч', 0.001]],
+      [1, 'EactImportPhB', True, [200, 60], ['накопленная активная энергия фаза В', 'КВт*ч', 0.001]],
+      [2, 'EactImportPhC', True, [200, 60], ['накопленная активная энергия фаза С', 'КВт*ч', 0.001]],
       ]

@@ -1,64 +1,88 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import numpy as np
-import yaml
-
-with open("data.yaml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
-
-import pprint
-pp = pprint.PrettyPrinter(width=120)
-pp.pprint(cfg)
+import sqlite3
+import memcache
+mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+#mc.flush_all()
 
 
-def check_each_rr(rr):
-    reg_start, reg_len = rr['start_and_len']
-    reg_type = rr['type']
-    pos = rr['data']
-    name = rr['data']
-
-    if len(pos) <> len(name):
-        print "Error: different length of arrays pos:{} name:{}".format(len(pos),len(name))
-
-    if len(name) <> len(set(name)):
-        print "Error: duplicate in names"
-
-def check_key_len(names, max_len=240):
-    for n in names:
-        if len(n)>max_len:
-            print "Error: {} is bigger than "
-
-def check_name(d={}):
-    if d.has_key('name'):
-        return d['name']
+def get_data_array(val):
+    try:
+        valT = val.split(";;;")
+        arr = []
+        for val in valT:
+            arr.append(val.split(";"))
+        return arr
+    except:
+        return None
 
 
-#for rr in cfg['modbus']['rr']:
-#    check_each_rr(rr)
+def write_data_to_db(_key, arr):
+    #import sqlite3
+    conn = sqlite3.connect(db_name)
+    #print "Opened database successfully";
+    if check_table_exist():
+        pass
+    else:
+        create_table()
+    key = _key.decode('utf8')
+    for a in arr:
+        if len(a)<2:
+            continue
+        #print "data to add {} {} {}".format(key, a[0], a[1])
+        conn.execute("INSERT INTO RAWDATA (NAME,VALUE,STIME)\
+                VALUES (?, ?, ?)", (key, a[0], a[1]))
+    conn.commit()
+    print "Records for {} key created successfully".format(_key)
+    conn.close()
 
-# separator = cfg['mc']['key_separator']
-# server = cfg['name']
-# device = cfg['modbus']['name']
-# tag = [r['name'] for r in cfg['modbus']['rr']]
-# tag = [l for tl in tag for l in tl]
-# ending = cfg['mc']['key_ending']
 
-# all_tags = []
-# for k_ending in ending:
-#     for k_server in server:
-#         for k_device in device:
-#             for k_tag in tag:
-#                 all_tags.append("".join(
-#                     ["{}{}".format(k,separator) for k in
-#                      [k_server, k_device, k_tag, k_ending]]
-#                     )[:-1]
-#                 )
-# print all_tags
+def create_table():
+    #import sqlite3
+    conn = sqlite3.connect(db_name)
+    conn.execute('''CREATE TABLE RAWDATA(
+   ID INTEGER PRIMARY KEY   AUTOINCREMENT,
+   NAME           TEXT      NOT NULL,
+   VALUE          REAL      NOT NULL,
+   STIME          CHAR(50));''')
+    conn.close()
+    print "create db {}".format(db_name)
+
+
+def check_table_exist():
+    #import sqlite3
+    conn = sqlite3.connect(db_name)
+    c1 = conn.execute("SELECT * FROM sqlite_master WHERE name ='RAWDATA' and type='table';")
+    f1 = c1.fetchall()
+    if f1:
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
+    #create_table()
+    #write_data_to_db()
+    #exit()
+    db_name = 'test1.db'
+    #conn = sqlite3.connect(db_name)
+    from time import sleep
     import yaml_data
-
-    print yaml_data.get_slave_id()
-
+    all_arc_keys_name = yaml_data.get_all_key_names_special(2)
+    while 1:
+        for key in all_arc_keys_name:
+            for _ in xrange(5):
+                val = mc.get(key)
+                if mc.cas(key, ''):
+                    arr = get_data_array(val)
+                    if arr is not None:
+                        try:
+                            write_data_to_db(key, arr)
+                        except:
+                            print "smthing wrong with db!"
+                    break
+        for i in xrange(180):
+            if not i%10:
+                print i
+            sleep(1)

@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-
 devs = yaml_data.whole_data
 # print (devs)
 mc = memcache.Client(['127.0.0.1:11211'], debug=0)
@@ -29,6 +28,20 @@ client = ModbusClient(method="rtu", port="/dev/ttyUSB0", baudrate=19200,
                       parity='E', stopbits=1, timeout=2)
 client.connect()
 logger.info("Staring infinite loop....")
+
+value_separator = yaml_data.value_separator  # ;
+append_value_separator = yaml_data.append_value_separator  # ;;;
+
+
+def check_time_passed(t1, t2, delta_sec=120):
+    t1 = datetime.strptime(t1,"%Y-%m-%d %H:%M:%S.%f")
+    t2 = datetime.strptime(t2,"%Y-%m-%d %H:%M:%S.%f")
+    dif = t2-t1
+    dif_sec = abs(dif.total_seconds())
+    return dif_sec >= delta_sec
+    #print "dif time= {} delta= {}".format(dif_sec,deltaSec)
+
+
 while True:
     for dev in devs:
         slave_id = yaml_data.get_slave_id(dev)
@@ -42,14 +55,14 @@ while True:
                 d = rr.registers
                 if reg_type == 'flt32':
                     values = [round(f * 1.0, 2) for f in
-                              unpack('>{}f'.format(len(d)/2),
+                              unpack('>{}f'.format(len(d) / 2),
                                      pack('>{}H'.format(len(d)), *d)
                                      )
                               ]
                 if reg_type == 'int64':
                     values = [f for f in
-                              unpack('>{}q'.format(len(d)/4),
-                                     pack('>{}H'.format(len(d)),*d)
+                              unpack('>{}q'.format(len(d) / 4),
+                                     pack('>{}H'.format(len(d)), *d)
                                      )
                               ]
             except AttributeError:
@@ -57,21 +70,33 @@ while True:
             else:
                 for data in reg_data:
                     pos, name_list, need_save = data[0:3]
-                    key_name_now, key_name_lst, key_name_arc= name_list
-                    if len(data)>3:
-                        save_chg_value = data[3]
-                        save_chq_time = data[4]
-                    value = values[pos]
-                    key_value = yaml_data.form_key_value(value, str_tstamp)
+                    key_name_now, key_name_lst, key_name_arc = name_list
+                    if len(data) > 3:
+                        save_delta_value, save_delta_time = data[3]
+                    current_value = values[pos]
+                    key_value = yaml_data.form_key_value(current_value, str_tstamp)
+
+                    # set now value
+                    mc.set(key=key_name_now, val=key_value, time=0)
+                    logger.debug("Write to mc ONLINE {}:{}".format(key_name_now, key_value))
+                    # if True to save
                     if need_save:
-                        pass
-                    else:
-                        mc.set(key=key_name_now,
-                               val=key_value,
-                               time=0)
-                        logger.debug("Write to mc {}:{}".format(key_name_now,key_value))
+                        last_saved_value_str = mc.get(key_name_lst)
+                        if last_saved_value_str is None:
+                            logger.debug("Create to mc ONLINE {}:{}".format(key_name_now, key_value))
+                            mc.set(key_name_lst, key_value)
+                            last_saved_value_str = mc.get(key_name_lst)
+                        # decompose last saved value
+                        last_saved_value, last_saved_time = tuple(last_saved_value_str.split(value_separator))[:2]
+                        last_saved_value = float(last_saved_value)
+                        if (abs(last_saved_value - current_value) > save_delta_value) \
+                                or (check_time_passed(str_tstamp, last_saved_time, save_delta_time)):
+                            logger.debug("Write to mc LAST {}:{}".format(key_name_lst, key_value))
+                            mc.set(key_name_lst, key_value)
+                            logger.debug("Append to mc ARC {}:{}".format(key_name_lst, key_value))
+                            if mc.append(key_name_arc, "{}{}".format(append_value_separator, key_value)) is False:
+                                mc.set(key_name_arc, "{}{}".format(append_value_separator, key_value))
             finally:
                 pass
 
 client.close()
-
