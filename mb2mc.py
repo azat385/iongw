@@ -13,7 +13,7 @@ formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 handler = TimedRotatingFileHandler('modbus_rtu.log',
                                    when='H',
-                                   interval=4,
+                                   interval=48,
                                    backupCount=5)
 handler.setFormatter(formatter)
 logger = logging.getLogger(__name__)
