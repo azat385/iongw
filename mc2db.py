@@ -1,6 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+# format the log entries
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+handler = TimedRotatingFileHandler('mc2db.log',
+                                   when='H',
+                                   interval=48,
+                                   backupCount=5)
+handler.setFormatter(formatter)
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
 import sqlite3
 import memcache
 mc = memcache.Client(['127.0.0.1:11211'], debug=0)
@@ -33,8 +48,9 @@ def write_data_to_db(_key, arr):
         #print "data to add {} {} {}".format(key, a[0], a[1])
         conn.execute("INSERT INTO RAWDATA (NAME,VALUE,STIME)\
                 VALUES (?, ?, ?)", (key, a[0], a[1]))
+        logger.debug("INSERT to DB::: NAME:{} VALEU:{} STIME:{}".format(key, a[0], a[1]))
     conn.commit()
-    print "Records for {} key created successfully".format(_key)
+    logger.info("Records for {} key created successfully".format(_key))
     conn.close()
 
 
@@ -67,10 +83,11 @@ if __name__ == '__main__':
     #write_data_to_db()
     #exit()
     #conn = sqlite3.connect(db_name)
+    logger.debug('Staring mc2mb.......')
     from time import sleep
     import yaml_data
     all_arc_keys_name = yaml_data.get_all_key_names_special(2)
-    while 1:
+    for _ in range(3):
         for key in all_arc_keys_name:
             for _ in xrange(5):
                 val = mc.get(key)
@@ -82,9 +99,6 @@ if __name__ == '__main__':
                         try:
                             write_data_to_db(key, arr)
                         except:
-                            print "smthing wrong with db!"
+                            logger.error('smthing wrong with db!')
                     break
-        for i in xrange(180):
-            if not i%10:
-                print i
-            sleep(1)
+        sleep(15)
