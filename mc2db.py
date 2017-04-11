@@ -2,15 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 
 # format the log entries
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
-handler = TimedRotatingFileHandler('mc2db.log',
-                                   when='H',
-                                   interval=48,
-                                   backupCount=5)
+handler = RotatingFileHandler('mc2db.log',
+                              mode='a',
+                              maxBytes=20*1024*1024,
+                              backupCount=5,
+                              encoding=None,
+                              delay=0)
 handler.setFormatter(formatter)
 logger = logging.getLogger(__name__)
 logger.addHandler(handler)
