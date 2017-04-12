@@ -120,7 +120,7 @@ if __name__ == '__main__':
     all_arc_keys_name = yaml_data.get_all_key_names_special(2)
     for _ in range(3):
         for key in all_arc_keys_name:
-            dev_name, tag_name = key.split('.')[1:]
+            dev_name, tag_name = key.split('.')[1:3]
             for _ in xrange(5):
                 val = mc.get(key)
                 if val is None:

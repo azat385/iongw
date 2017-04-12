@@ -45,7 +45,7 @@ class Data(Base):
             self.id, self.device_id, self.tag_id, )
 
 
-engine = create_engine('sqlite:///{}'.format(db_name), echo=True)
+engine = create_engine('sqlite:///{}'.format(db_name), echo=False)
 
 Base.metadata.create_all(engine)
 
