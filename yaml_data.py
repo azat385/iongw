@@ -6,7 +6,7 @@ from cPickle import dumps, loads
 import pprint
 
 
-pp = pprint.PrettyPrinter(width=200)
+pp = pprint.PrettyPrinter(width=500)
 
 with open("data.yaml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
@@ -103,10 +103,19 @@ def form_key_value(*args):
     # type: (object) -> object
     return "{}{}{}".format(args[0], value_separator, args[1])
 
+
+whole_tag = [rr_data(rr) for rr in rr_list]
+
+whole_tag = [item for sublist in whole_tag for item in sublist]
+
 if __name__ == '__main__':
     print "start checks"
     #pp.pprint(whole_data)
-    pp.pprint(get_all_key_names_special(2))
+    # pp.pprint(get_all_key_names_special(2))
+    pp.pprint(whole_tag)
+    print len(whole_tag)
+    #for t in whole_tag:
+    #    print len(t)
     #print len(get_all_key_names_special(2))
     #print get_slave_id()
     #print get_slave_name()
