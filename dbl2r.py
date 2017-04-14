@@ -50,7 +50,7 @@ while 1:
     remote_last = remote_session.query(Data).order_by(Data.id.desc()).first()
     logger.debug('db rows remote={}, local={}'.format(remote_last.id, local_last.id))
 
-    if remote_last.id >= local_last.id - 50:
+    if remote_last.id >= local_last.id - 5:
         logger.info('db rows remote={}, local={}'.format(remote_last.id, local_last.id))
         logger.info('Finishing the cycles: {} has been added'.format(remote_last.id-remote_last_initial_id))
         break
