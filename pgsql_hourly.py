@@ -86,8 +86,8 @@ session.query(Data).count()
 from datetime import datetime
 def my_tstamp_strip(t):
     return datetime.strptime(t,"%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%d %H:00")
-ts_example = u'2017-03-26 22:20:00.159490'
-print my_tstamp_strip(ts_example)
+# ts_example = u'2017-03-26 22:20:00.159490'
+# print my_tstamp_strip(ts_example)
 
 
 def get_hourly_last_row_stime():
@@ -101,11 +101,11 @@ def get_hourly_last_row_stime():
     ).order_by(Hourly.id.desc()).first()
     if last_record is None:
         stime = "2017-00-00 00:00"
-        print "INITIAL TIME IS USED"
+        logger.info("INITIAL TIME IS USED")
     else:
         stime = last_record.stime
 
-    print "last_record_stime:", stime
+    logger.debug("last_record_stime: {}".format(stime))
     return stime
 
 
@@ -151,7 +151,7 @@ def one_tag_shot(g,d,t):
         # print records
 
         if records is None:
-            print "NOTHING TO ADD!!!!"
+            logger.info("NOTHING TO ADD!!!!")
             break
         else:
             #sort duplicate hour data to required
@@ -164,16 +164,16 @@ def one_tag_shot(g,d,t):
                     r_hour_prev=r_hour
                 else:
                     continue
-            print "len(required):",len(required)
+            logger.debug("len(required):".format(len(required)))
 
             # add data to table
             if len(required)>1:
-                print "ADD TO HOURLY TABLE"
+                logger.debug("ADD TO HOURLY TABLE")
                 rows_added += add_data_hourly(required)
             else:
-                print "TOO LESS DATA, cant add"
+                logger.debug("TOO LESS DATA, cant add")
                 break
-    print g.name, d.name, t.name, "rows_added:", rows_added
+    logger.info("{}.{}.{} rows_added: {}".format(g.name, d.name, t.name, rows_added))
 
 
 m = func.date_part('minute',cast(Data.stime, types.DateTime)).label('m')
@@ -185,13 +185,12 @@ device_list = session.query(Device).all()
 tag_list = session.query(Tag).filter(Tag.name.ilike('%import%')&~Tag.name.ilike('%part%')).all()
 
 for i,t in enumerate(tag_list):
-    print i,t.name
+    logger.debug("{} {}".format(i+1,t.name))
 
 for g in gw_list:
     for d in device_list:
         for t in tag_list:
             one_tag_shot(g,d,t)
-
 
 # last_record = session.query(Hourly).filter(
 #     and_(
@@ -205,7 +204,7 @@ for g in gw_list:
 # for i,r in enumerate(last_record[:5]):
 #     print i, r,r.stime
 
-print session.query(Hourly).count()
+logger.debug("Horly table rows: {}".format(session.query(Hourly).count()))
 
 # session.query(Hourly).delete()
 # session.commit()
