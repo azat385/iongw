@@ -57,6 +57,27 @@ class Hourly(Base):
     
     def __repr__(self):
         return "<Hourly(id='{}', value='{}')>".format(self.id, self.value)
+
+
+class Daily(Base):
+    __tablename__ = 'daily'
+    id = Column(Integer, primary_key=True)
+    gateway_id = Column(Integer, ForeignKey('gateway.id'))
+    gateway = relationship(Gateway)
+    device_id = Column(Integer, ForeignKey('device.id'))
+    device = relationship(Device)
+    tag_id = Column(Integer, ForeignKey('tag.id'))
+    tag = relationship(Tag)
+    start_data_id = Column(Integer, ForeignKey('data.id'))
+    end_data_id = Column(Integer, ForeignKey('data.id'))
+    value = Column(REAL)
+    stime = Column(String(50))
+
+    start_data = relationship(Data, foreign_keys='Daily.start_data_id')
+    end_data = relationship(Data, foreign_keys='Daily.end_data_id')
+
+    def __repr__(self):
+        return "<Daily(id='{}', value='{}')>".format(self.id, self.value)
     
 url = 'postgresql://{}:{}@{}:{}/{}'
 url = url.format('dbraw', ',fpflfyys[', 'localhost', 5432, 'dbraw')
@@ -131,7 +152,7 @@ def add_data_hourly(required):
     return r_add
 
 
-def one_tag_shot(g,d,t):
+def one_tag_shot(g, d, t):
     sql_limit=1000
     i = 0
     rows_added = 0
@@ -174,6 +195,7 @@ def one_tag_shot(g,d,t):
                 logger.debug("TOO LESS DATA, cant add")
                 break
     logger.info("{}.{}.{} rows_added: {}".format(g.name, d.name, t.name, rows_added))
+    return rows_added
 
 
 m = func.date_part('minute',cast(Data.stime, types.DateTime)).label('m')
@@ -184,13 +206,20 @@ gw_list = session.query(Gateway).all()
 device_list = session.query(Device).all()
 tag_list = session.query(Tag).filter(Tag.name.ilike('%import%')&~Tag.name.ilike('%part%')).all()
 
-for i,t in enumerate(tag_list):
-    logger.debug("{} {}".format(i+1,t.name))
 
-for g in gw_list:
-    for d in device_list:
-        for t in tag_list:
-            one_tag_shot(g,d,t)
+if __name__ == '__main__':
+    logger.info("Start process...")
+    for i, t in enumerate(tag_list):
+        logger.debug("Tags count:{} {}".format(i+1,t.name))
+
+    rows_count = 0
+    for g in gw_list:
+        for d in device_list:
+            for t in tag_list:
+                rows_count += one_tag_shot(g, d, t)
+
+    logger.debug("Hourly table count: {}".format(session.query(Hourly).count()))
+    logger.info('Totaly added rows: {}'.format(rows_count))
 
 # last_record = session.query(Hourly).filter(
 #     and_(
@@ -203,8 +232,6 @@ for g in gw_list:
 # print "len(last_record):", len(last_record)
 # for i,r in enumerate(last_record[:5]):
 #     print i, r,r.stime
-
-logger.debug("Horly table rows: {}".format(session.query(Hourly).count()))
 
 # session.query(Hourly).delete()
 # session.commit()
