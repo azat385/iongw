@@ -201,6 +201,7 @@ def one_tag_shot(g, d, t):
 m = func.date_part('minute',cast(Data.stime, types.DateTime)).label('m')
 h = func.date_part('hour',cast(Data.stime, types.DateTime)).label('h')
 
+
 # Here define gateway, device and tags to add hourly procedure
 gw_list = session.query(Gateway).all()
 device_list = session.query(Device).all()
