@@ -61,10 +61,10 @@ def add_data_daily(required):
         new_record = Daily(gateway=g,
                           device=d,
                           tag=t,
-                          value=r_data.end_data.value-r_data_prev.end_data.value,
+                          value=r_data.start_data.value-r_data_prev.start_data.value,
                           stime=my_tstamp_strip(r_data.stime),
-                          start_data=r_data_prev.end_data,
-                          end_data=r_data.end_data,
+                          start_data=r_data_prev.start_data,
+                          end_data=r_data.start_data,
                          )
         # print new_record
         session.add(new_record)
