@@ -58,8 +58,7 @@ def add_data_daily(required):
         if i==0:
             r_data_prev = r_data
             continue
-        print r_data, r_day, r_data.value-r_data_prev.value, my_tstamp_strip(r_data.stime)
-        new_record = Hourly(gateway=g,
+        new_record = Daily(gateway=g,
                           device=d,
                           tag=t,
                           value=r_data.end_data.value-r_data_prev.end_data.value,
@@ -67,6 +66,7 @@ def add_data_daily(required):
                           start_data=r_data_prev.end_data,
                           end_data=r_data.end_data,
                          )
+        # print new_record
         session.add(new_record)
         r_add += 1
         r_data_prev = r_data
