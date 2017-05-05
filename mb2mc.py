@@ -7,14 +7,16 @@ import memcache
 from datetime import datetime
 from time import sleep
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
-handler = TimedRotatingFileHandler('modbus_rtu.log',
-                                   when='H',
-                                   interval=48,
-                                   backupCount=5)
+handler = RotatingFileHandler('modbus_rtu.log',
+                              mode='a',
+                              maxBytes=50 * 1024 * 1024,
+                              backupCount=5,
+                              encoding=None,
+                              delay=0)
 handler.setFormatter(formatter)
 logger = logging.getLogger(__name__)
 logger.addHandler(handler)
